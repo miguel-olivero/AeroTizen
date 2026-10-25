@@ -11,3 +11,11 @@ device-profile.xml
 node_modules/
 test-results/
 playwright-report/
+
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+*.pfx
+*.pem
+*.key

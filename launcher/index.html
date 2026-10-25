@@ -7,6 +7,7 @@
   <link rel="icon" href="icon.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/tile-actions.css">
+  <link rel="stylesheet" href="css/lounge.css">
 </head>
 <body>
   <div id="bg" class="bg"></div>
@@ -19,9 +20,9 @@
       <svg id="network" class="status-icon" viewBox="0 0 24 24" aria-label="Network"></svg>
     </div>
     <nav class="view-tabs" aria-label="App views">
-      <button id="home-tab" class="view-tab active" type="button" tabindex="-1" aria-pressed="true">Home</button>
-      <button id="apps-tab" class="view-tab" type="button" tabindex="-1" aria-pressed="false">All apps</button>
-    </nav>
+      <button id="home-tab" class="view-tab active" type="button" tabindex="-1" aria-pressed="true">Favorites</button>
+      <button id="apps-tab" class="view-tab" type="button" tabindex="-1" aria-pressed="false">Applications</button>
+    <button id="inputs-tab" class="view-tab" type="button" tabindex="-1">Inputs</button></nav>
     <div class="topbar-right">
       <span id="weather" class="weather" hidden></span>
       <span id="date" class="date"></span>
@@ -29,8 +30,14 @@
     </div>
   </header>
 
+  <div id="wallpaper-credit" class="wallpaper-credit" hidden></div>
   <div class="content-viewport">
     <main id="rows">
+      <section id="nodo-dashboard" class="nodo-dashboard" aria-label="Recursos de Nodo">
+        <div class="nodo-heading"><span>Nodo</span><span id="nodo-status" role="status">Consultando Nodo…</span></div>
+        <div id="nodo-resources" class="nodo-resources" hidden></div>
+        <div id="nodo-services" class="nodo-services" hidden></div>
+      </section>
       <div id="grid" class="app-grid" aria-label="Home apps"></div>
       <p id="apps-empty" class="apps-empty" hidden>No apps found.</p>
       <section id="inputs-section" class="row-wrap inputs-wrap" hidden>
@@ -91,6 +98,7 @@
   <script src="js/settings.js"></script>
   <script src="js/clock.js"></script>
   <script src="js/logos.js"></script>
+  <script src="js/wallpapers.js"></script>
   <script src="js/backgrounds.js"></script>
   <script src="js/weather.js"></script>
   <script src="js/network.js"></script>
@@ -102,6 +110,7 @@
   <script src="js/inputs.js"></script>
   <script src="js/home-screen.js"></script>
   <script src="js/settings-ui.js"></script>
+  <script src="js/nodo.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

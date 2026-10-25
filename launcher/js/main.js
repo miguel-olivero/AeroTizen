@@ -45,6 +45,7 @@
   A.applyBackground();
   A.clock.start();
   A.network.start();
+  A.nodo.start();
   window.Weather.start(function () { return A.settings; });
   A.apps.load(function () {
     if (A.settings.home === null) { A.settings.home = A.apps.defaultHome(); A.settings.save(); }

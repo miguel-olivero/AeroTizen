@@ -36,6 +36,8 @@ window.Backgrounds = (function () {
     { id: 'rain', name: 'Rain', anim: 'particles', kind: 'rain', base: 'linear-gradient(180deg,#070b12 0%,#0e1520 100%)' },
     { id: 'waves', name: 'Ocean Waves', anim: 'waves', base: 'linear-gradient(180deg,#03101c 0%,#05243a 100%)' },
     // static
+    { id: 'featured', name: 'Nature & Space', base: 'linear-gradient(140deg,#142135,#08090c 70%)' },
+    { id: 'lounge', name: 'Lounge', base: 'radial-gradient(1400px 900px at 80% 0%, #263351 0%, rgba(38,51,81,0) 70%), radial-gradient(1200px 900px at 0% 100%, #221b35 0%, rgba(34,27,53,0) 70%), #090b12' },
     { id: 'black', name: 'Black', base: '#000' },
     { id: 'midnight', name: 'Midnight', base: 'radial-gradient(1500px 900px at 15% -10%, #1d2a52 0%, rgba(29,42,82,0) 60%), #04060c' },
     { id: 'graphite', name: 'Graphite', base: 'linear-gradient(180deg, #202126 0%, #0c0c0e 100%)' },
@@ -77,6 +79,7 @@ window.Backgrounds = (function () {
   }
 
   function clear() {
+    if (window.Wallpapers) { window.Wallpapers.stop(); }
     if (canvasTimer) { if (canvasTimer.stop) { canvasTimer.stop(); } else { clearInterval(canvasTimer); } canvasTimer = null; }
     if (layer) { layer.textContent = ''; }
   }
@@ -206,7 +209,8 @@ window.Backgrounds = (function () {
     clear();
     // Only the root gets a background: a body background would paint over the animated layer.
     document.documentElement.style.background = b.base; document.body.style.background = 'transparent';
-    if (b.anim === 'blobs') { addBlobs(b); if (b.stars) { addStars(false); } }
+    if (b.id === 'featured') { window.Wallpapers.apply(layer); }
+    else if (b.anim === 'blobs') { addBlobs(b); if (b.stars) { addStars(false); } }
     else if (b.anim === 'stars') { addStars(true); }
     else if (b.anim === 'waves') { addWaves(); }
     else if (b.anim === 'particles') { addParticles(b.kind); }

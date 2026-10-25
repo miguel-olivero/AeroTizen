@@ -34,33 +34,76 @@
     return d ? svg('<path fill="' + fill + '" d="' + d + '"/>', 'logo') : '';
   }
 
+  // Sample a tiny image once per icon. Alpha-weighted color buckets ignore transparent pixels.
+  var iconColors = Object.create(null), colorCount = 0;
+  function imageBackground(image, tile) {
+    var key = image.src, color = iconColors[key];
+    try {
+      if (!color) {
+        var canvas = document.createElement('canvas'); canvas.width = canvas.height = 24;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(image, 0, 0, 24, 24);
+        var pixels = ctx.getImageData(0, 0, 24, 24).data, buckets = {}, best = null;
+        for (var i = 0; i < pixels.length; i += 4) {
+          var alpha = pixels[i + 3] / 255;
+          if (alpha < 0.12) { continue; }
+          var bucketKey = (pixels[i] >> 5) + ',' + (pixels[i + 1] >> 5) + ',' + (pixels[i + 2] >> 5);
+          var bucket = buckets[bucketKey] || (buckets[bucketKey] = { weight: 0, r: 0, g: 0, b: 0 });
+          bucket.weight += alpha; bucket.r += pixels[i] * alpha; bucket.g += pixels[i + 1] * alpha; bucket.b += pixels[i + 2] * alpha;
+          if (!best || bucket.weight > best.weight) { best = bucket; }
+        }
+        if (!best) { return; }
+        color = [best.r, best.g, best.b].map(function (value) { return Math.round(8 + value / best.weight * 0.26); });
+        if (colorCount >= 100) { iconColors = Object.create(null); colorCount = 0; }
+        iconColors[key] = color; colorCount++;
+      }
+      var dark = color.map(function (value) { return Math.round(value * 0.55); });
+      tile.style.background = 'linear-gradient(135deg,rgb(' + color.join(',') + '),rgb(' + dark.join(',') + '))';
+    } catch (e) { /* Some TV/cross-origin icons cannot be read by canvas; retain the fallback background. */ }
+  }
+
   function appTile(app, extraClass, onSelect) {
-    var b = brandFor(app), tile = A.el('div');
+    var b = brandFor(app), tile = A.el('div'), nodoCard = extraClass === 'nodo-card';
     tile.className = 'tile app-tile' + (extraClass ? ' ' + extraClass : '');
     tile.setAttribute('role', 'button');
     tile.setAttribute('aria-label', shortName(app.name));
     tile.title = shortName(app.name);
     tile.style.background = b.background;
+    if (/^#(?:fff|ffffff)$/i.test(b.background)) { tile.classList.add('light-brand'); }
     var fallback = A.el('div', 'app-fallback'), mark = b.logo && logoSvg(b.logo, b.logoColour);
-    if (!b.label) { fallback.classList.add('logo-only'); }
+    if (!b.label && !nodoCard) { fallback.classList.add('logo-only'); }
     if (b.largeLogo) { fallback.classList.add('logo-big'); }
     if (mark) {
       fallback.innerHTML = mark;
     } else if (b.useAppIcon && app.icon) {
+      if (nodoCard) {
+        tile.classList.add('native-icon');
+        var initials = shortName(app.name).split(/\s+/).map(function (word) { return word.charAt(0); }).slice(0, 2).join('').toUpperCase();
+        var monogram = A.el('span', 'app-monogram', initials);
+        fallback.appendChild(monogram);
+      }
       var img = new Image();
       img.className = 'logo'; img.alt = '';
+      if (nodoCard) { img.onload = function () {
+        monogram.hidden = true; imageBackground(img, tile);
+        var backdrop = new Image(); backdrop.className = 'native-backdrop'; backdrop.alt = '';
+        backdrop.src = img.src; fallback.appendChild(backdrop);
+        img.onload = null;
+      }; }
       img.onerror = function () { fallback.removeChild(img); };
       img.src = app.icon;
       fallback.appendChild(img);
     }
-    if (b.label || !mark) {
+    if (nodoCard || b.label || !mark) {
       var name = A.el('div', 'name', b.label || shortName(app.name));
       name.style.color = b.textColour;
+      if (nodoCard && name.textContent.length > 24) { name.classList.add(name.textContent.length > 45 ? 'name-extra-long' : 'name-long'); }
       fallback.appendChild(name);
     }
     tile.appendChild(fallback);
     tile.onclick = onSelect;
 
+    if (nodoCard) { return tile; }
     var sources = A.artwork.sources(app), at = 0;
     function next() {
       if (at >= sources.length) { return; }
@@ -85,6 +128,33 @@
     return tile;
   }
 
+  // Measure whole words: single-word titles shrink, multi-word titles wrap only at spaces.
+  var labelCanvas = null;
+  function fitNames(grid) {
+    if (!grid || !grid.querySelectorAll) { return; }
+    labelCanvas = labelCanvas || document.createElement('canvas');
+    var context = labelCanvas.getContext('2d');
+    var labels = grid.querySelectorAll('.name');
+    for (var i = 0; i < labels.length; i++) {
+      var name = labels[i]; name.style.fontSize = ''; name.style.whiteSpace = '';
+      var words = name.textContent.trim().split(/\s+/), style = window.getComputedStyle(name);
+      var size = parseFloat(style.fontSize), width = name.clientWidth;
+      if (!size || !width) { continue; }
+      if (words.length === 1) { name.style.whiteSpace = 'nowrap'; }
+      context.font = style.fontWeight + ' ' + size + 'px ' + style.fontFamily;
+      var widest = 0;
+      words.forEach(function (word) { widest = Math.max(widest, context.measureText(word).width); });
+      if (widest > width) { size = size * (width - 1) / widest; }
+      var available = name.parentNode.clientHeight - parseFloat(style.bottom || 0) - 16;
+      // Fit tall multi-line names as well, while leaving every word intact.
+      for (var attempt = 0; attempt < 8; attempt++) {
+        name.style.fontSize = size.toFixed(2) + 'px';
+        if (name.offsetHeight <= available) { break; }
+        size *= 0.9;
+      }
+    }
+  }
+
   // A compact card (icon + label), used for inputs.
   function card(label, iconSvg, onSelect) {
     var tile = A.el('div', 'tile');
@@ -102,5 +172,5 @@
       largeLogo: !!brand.largeLogo, useAppIcon: !!brand.useAppIcon, artwork: A.artwork.sources(app) };
   }
 
-  A.tiles = { ICONS: ICONS, app: appTile, card: card, shortName: shortName, describe: describe };
+  A.tiles = { ICONS: ICONS, app: appTile, card: card, shortName: shortName, describe: describe, fitNames: fitNames };
 })(window.AeroTizen);

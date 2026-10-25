@@ -236,14 +236,14 @@ test('Back dismisses the menu and the next short OK still launches', () => {
   assert.equal(h.launches, 1);
 });
 
-test('removing the last tile selects Inputs when available, otherwise Home tab', () => {
+test('removing the last favourite selects Home tab without entering another page', () => {
   for (const withInput of [true, false]) {
     const h = fixture(['a'], withInput);
     h.fireHold();
     h.key(40);
     h.key(13); h.A.homeScreen.keyup(13);
     assert.deepEqual(h.settings.home, []);
-    const expected = withInput ? h.inputs.children[0] : h.homeTab;
+    const expected = h.homeTab;
     assert.ok(expected.classList.contains('focused'));
   }
 });

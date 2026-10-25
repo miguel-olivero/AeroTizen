@@ -1,3 +1,4 @@
+import { NodoSettings } from './sections/NodoSettings';
 import { RemoteControl } from './components/RemoteControl';
 import { useMemo } from 'preact/hooks';
 import { useStore } from '../shared/hooks/useStore';
@@ -26,6 +27,7 @@ export const Settings = ({ active, previewing, openedAt }: { active: boolean; pr
       <BackgroundSettings settings={settings} actions={actions} config={services.config} backgrounds={services.backgrounds} />
       <WeatherSettings settings={settings} actions={actions} active={active} />
       <DisplaySettings settings={settings} actions={actions} clock={services.clock} openedAt={openedAt} />
+      <NodoSettings settings={settings} actions={actions} />
       <InputSettings settings={settings} actions={actions} inputs={inputs} />
       {appMenu}
       <RemoteControl id="escape" class="escape" focusKey="escape" role="button" onClick={actions.useSamsungHome}>

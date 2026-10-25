@@ -5,29 +5,34 @@
   var cfg = A.config, COLS = 3;
   var rows = [], row = 1, col = [], scrollY = 0;
   var page = 'home';
-  var tabCache = { home: null, apps: null };
+  var tabCache = { home: null, apps: null, inputs: null };
   var moving = null, tileMenu = null;
   var CHEVRONS = { left: 'M15 5l-7 7 7 7', right: 'M9 5l7 7-7 7', up: 'M5 15l7-7 7 7', down: 'M5 9l7 7 7-7' };
 
   function gridTiles() { return [].slice.call(A.$('grid').children); }
 
   function render(fromTabSwitch) {
-    if (!fromTabSwitch) { tabCache.home = null; tabCache.apps = null; }
+    if (!fromTabSwitch) { tabCache.home = null; tabCache.apps = null; tabCache.inputs = null; }
     if (tileMenu) { closeTileMenu(false); }
     var grid = A.$('grid'), home = A.settings.home, size = A.settings.cardSize === 'small' ? 'small' : 'big';
-    COLS = cfg.CARD_COLUMNS[size];
+    COLS = page === 'home' ? Math.max(1, home.length) : cfg.CARD_COLUMNS[size];
+    document.body.classList.toggle('home-page', page === 'home');
+    document.body.classList.toggle('inputs-page', page === 'inputs');
     grid.className = 'app-grid cards-' + size;
     grid.textContent = '';
     if (page === 'home') {
       home = home.filter(function (id) { return id === cfg.FIREPLACE_ID || A.apps.byId(id); });
       A.settings.home = home;
+    } else if (page === 'inputs') {
+      home = [];
     } else {
       home = A.apps.all.map(function (app) { return app.id; });
     }
-    A.$('apps-empty').hidden = page === 'home' || home.length > 0;
+    A.$('apps-empty').hidden = page !== 'apps' || home.length > 0;
     grid.setAttribute('aria-label', page === 'home' ? 'Home apps' : 'All apps');
-    ['home', 'apps'].forEach(function (name) {
-      var tab = A.$(name + '-tab'), selected = (name === 'home') === (page === 'home');
+    ['home', 'apps', 'inputs'].forEach(function (name) {
+      var tab = A.$(name + '-tab'), selected = name === page;
+      if (!tab) { return; }
       tab.classList.toggle('active', selected);
       tab.setAttribute('aria-pressed', String(selected));
     });
@@ -46,10 +51,11 @@
         tile.setAttribute('aria-label', 'Fireplace');
         tile.title = 'Fireplace';
         tile.innerHTML = A.tiles.ICONS.flame;
+        tile.appendChild(A.el('div', 'name', 'Fireplace'));
         tile.onclick = A.apps.playFireplace;
       } else {
         var app = A.apps.byId(id);
-        tile = A.tiles.app(app, '', function () { A.apps.launch(app); });
+        tile = A.tiles.app(app, 'nodo-card', function () { A.apps.launch(app); });
       }
       tile.dataset.id = id;
       batch.appendChild(tile);
@@ -59,9 +65,12 @@
   }
 
   function buildRows() {
-    rows = [[A.$('gear'), A.$('home-tab'), A.$('apps-tab')]].concat(A.chunk(gridTiles(), COLS));
+    if (A.tiles.fitNames) { A.tiles.fitNames(A.$('grid')); }
+    var header = [A.$('gear'), A.$('home-tab'), A.$('apps-tab')];
+    if (A.$('inputs-tab')) { header.push(A.$('inputs-tab')); }
+    rows = [header].concat(A.chunk(gridTiles(), COLS));
     var inputTiles = [].slice.call(A.$('inputs').children);
-    A.$('inputs-section').hidden = page !== 'home' || inputTiles.length === 0;
+    A.$('inputs-section').hidden = page !== 'inputs' || inputTiles.length === 0;
     if (!A.$('inputs-section').hidden) { rows.push(inputTiles); }
     for (var r = 0; r < rows.length; r++) { if (col[r] === undefined) { col[r] = 0; } }
     focus();
@@ -77,6 +86,15 @@
     el.classList.add('focused');
     // Keep the focused row on screen (only matters with more than 6 apps). Measured on screen,
     // since offsetTop is relative to the nearest positioned parent.
+    if (page === 'home') {
+      var dock = A.$('grid');
+      if (el.parentNode === dock && el.getBoundingClientRect) {
+        var itemRect = el.getBoundingClientRect(), dockRect = dock.getBoundingClientRect();
+        if (itemRect.left < dockRect.left + 22) { dock.scrollLeft += itemRect.left - dockRect.left - 22; }
+        else if (itemRect.right > dockRect.right - 22) { dock.scrollLeft += itemRect.right - dockRect.right + 22; }
+      }
+      scrollY = 0; A.$('rows').style.transform = 'translate3d(0,0,0)'; return;
+    }
     var main = A.$('rows'), rect = el.getBoundingClientRect(), mainTop = main.getBoundingClientRect().top;
     // Use the unscrolled position so rapid key repeats cannot compound an active transition.
     var viewportTop = main.parentNode.getBoundingClientRect().top;
@@ -91,7 +109,7 @@
     while (r > 0 && r < rows.length && !rows[r].length) { r += dRow; }
     if (r < 0 || r >= rows.length) { return; }
     // Returning to the header selects the current page, regardless of the app column.
-    row = r; col[row] = row === 0 ? (page === 'home' ? 1 : 2) : c; focus();
+    row = r; col[row] = row === 0 ? (page === 'home' ? 1 : page === 'apps' ? 2 : 3) : c; focus();
   }
 
   function current() { return rows[row] && rows[row][col[row]]; }
@@ -105,7 +123,7 @@
     while (grid.firstChild) { parked.appendChild(grid.firstChild); }
     tabCache[page] = parked;
     page = next;
-    row = 0; col = [page === 'home' ? 1 : 2]; scrollY = 0;
+    row = 0; col = [page === 'home' ? 1 : page === 'apps' ? 2 : 3]; scrollY = 0;
     A.$('rows').style.transform = 'translate3d(0,0,0)';
     render(true);
   }
@@ -340,8 +358,8 @@
     if (moving) {
       if (k === KEY.LEFT) { e.preventDefault(); stepMove(-1); }
       else if (k === KEY.RIGHT) { e.preventDefault(); stepMove(1); }
-      else if (k === KEY.UP) { e.preventDefault(); stepMove(-COLS); }
-      else if (k === KEY.DOWN) { e.preventDefault(); stepMove(COLS); }
+      else if (k === KEY.UP) { e.preventDefault(); }
+      else if (k === KEY.DOWN) { e.preventDefault(); }
       else if (k === KEY.ENTER || k === KEY.BACK || k === KEY.ESC) {
         e.preventDefault();
         if (k !== KEY.ENTER || !enterDown) {
@@ -392,4 +410,11 @@
   };
   A.$('home-tab').onclick = function () { showPage('home'); };
   A.$('apps-tab').onclick = function () { showPage('apps'); };
+  if (A.$('inputs-tab')) {
+    A.$('inputs-tab').onclick = function () {
+      showPage('inputs');
+      if (!A.$('inputs').children.length) { A.toast('No inputs available'); return; }
+      row = rows.length - 1; col[row] = 0; focus();
+    };
+  }
 })(window.AeroTizen);

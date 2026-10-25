@@ -36,7 +36,7 @@ const runSettingsUi = async (page, { baselineUrl, screenshotPath }) => {
       key(K.UP); key(K.LEFT); key(K.ENTER); key(K.ENTER, 'keyup');
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       assert(A.settingsUi.isOpen(), 'remote opens Settings');
-      assert(document.querySelector('#editor .focused').dataset.key === 'bg:aurora', 'initial focus');
+      assert(document.querySelector('#editor .focused').dataset.key === 'bg:' + A.config.DEFAULTS.background, 'initial focus');
       if (variant === 'preact') {
         assert(document.activeElement === document.querySelector('#editor .focused'), 'remote state and browser focus agree');
         assert(document.querySelectorAll('#editor [data-key][tabindex="0"]').length === 1, 'one remote control is in the tab order');
@@ -96,6 +96,7 @@ const runSettingsUi = async (page, { baselineUrl, screenshotPath }) => {
       assert(!document.querySelector('#weather-results').textContent.includes('Closed search'), 'closed search ignored');
       find(variant === 'preact' ? 'weather-visibility:false' : 'weather:show:false').click();
       assert(A.settings.weatherShowLocation === false, 'location visibility saved');
+      find('bg:aurora').click();
       find('preview').click(); assert(document.body.classList.contains('previewing'), 'preview opens');
       key(K.RIGHT); assert(!document.body.classList.contains('previewing'), 'any key exits preview');
       if (variant === 'preact') {

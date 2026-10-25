@@ -11,6 +11,7 @@ export const createSettingsActions = (
     settings.refresh();
   });
   return {
+    setNodoUrl: nodoUrl => commit({ nodoUrl }),
     setBackground: background => commit({ background }, services.applyBackground),
     setWeatherVisible: showWeather => commit({ showWeather }, services.applyWeatherVisibility),
     setLocationVisible: weatherShowLocation => commit({ weatherShowLocation }, services.applyLocationVisibility),

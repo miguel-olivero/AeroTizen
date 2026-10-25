@@ -12,6 +12,7 @@ test.beforeEach(async ({ page }) => {
     if (['error', 'warning'].includes(message.type())) messages.push(message.text());
   });
   // All weather lookups are fixtures; no entered location leaves the test.
+  await page.route('http://nodo.test/api/status', route => route.fulfill({ contentType: 'application/json', body: '{"ok":false}' }));
   await page.route('https://**/*', route => route.fulfill({ contentType: 'application/json', body: '{}' }));
   await page.route('http://127.0.0.1:47790/**', route => route.fulfill({ body: '{}' }));
 });

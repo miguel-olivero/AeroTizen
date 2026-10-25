@@ -1,0 +1,129 @@
+/* Nodo-inspired presentation; three/five columns match remote navigation. */
+:root { --bg: #08090c; --focus: #e5eaff; --muted: #9b9ba8; --card: #17181d; }
+html, body { font-family: "Helvetica Neue", "SamsungOne", Arial, sans-serif; }
+.topbar { height: 132px; padding: 0 80px; }
+.topbar-left, .topbar-right { gap: 20px; }
+.view-tabs { background: rgba(255,255,255,.055); padding: 8px; }
+.view-tab { font-size: 28px; padding: 14px 24px; font-weight: 500; }
+.view-tab.active { background: rgba(255,255,255,.12); }
+.view-tab.focused, .icon-btn.focused { color: #111827; background: #f1f4ff; box-shadow: 0 0 0 3px rgba(255,255,255,.3); }
+.icon-btn { background: rgba(255,255,255,.06); }
+.icon-btn svg, .status-icon { width: 32px; height: 32px; }
+.date, .time, .weather { font-size: 27px; }
+.weather svg { width: 34px; height: 34px; }
+.weather { margin-right: 0; }
+.content-viewport { height: 948px; }
+main { padding: 10px 80px 64px; }
+.app-grid { gap: 36px 34px; margin: 24px 0 40px; }
+.app-grid .tile { width: 324px; height: 324px; }
+.app-grid.cards-big { justify-content: center; gap: 36px 44px; width: 1138px; margin-left: auto; margin-right: auto; }
+.app-grid.cards-big .tile { width: 350px; height: 350px; }
+.tile { border-radius: 30px; transition: transform .22s cubic-bezier(.2,.8,.2,1); box-shadow: 0 12px 28px rgba(0,0,0,.3), inset 0 0 0 1px rgba(255,255,255,.16); }
+.tile.focused { transform: translateZ(0) scale(1.055); box-shadow: 0 0 0 4px rgba(255,255,255,.9), 0 24px 48px rgba(0,0,0,.5); }
+.tile.moving { transform: translateZ(0) scale(1.06) translateY(-8px); }
+/* Preserve TV artwork, while fallback cards use Nodo's watermark and muted gradients. */
+.app-grid .app-tile:not(.has-artwork)::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(130deg,rgba(255,255,255,.04),rgba(8,9,12,.74)); }
+.app-grid .app-tile.light-brand:not(.has-artwork) { background: linear-gradient(135deg,#8b2934,#29121c) !important; }
+.app-grid .app-fallback { position: relative; overflow: hidden; }
+.app-grid .app-fallback .logo { position: absolute; left: -20px; bottom: -26px; width: 260px; height: 260px; opacity: .26; transform: rotate(-9deg); filter: grayscale(1) brightness(0) invert(1); }
+.app-grid .app-fallback .name { position: absolute; bottom: 32px; left: 32px; right: 24px; z-index: 1; font-size: 30px; text-align: left; color: white !important; }
+.app-grid .app-fallback.logo-only .logo { position: static; width: 220px; height: 180px; transform: none; opacity: .9; filter: none; }
+.inputs-wrap h2 { font-size: 28px; color: #b2b5c2; margin-bottom: 24px; }
+.small .tile { height: 120px; border-radius: 26px; background: rgba(255,255,255,.07); }
+.sheet { background: rgba(8,9,12,.96); }
+.swatch, .grid .tile { border-radius: 24px; }
+.toast { background: #eef2ff; color: #111827; border-radius: 24px; }
+.nodo-dashboard { height: 174px; color: #a7a9b4; margin-bottom: 26px; }
+.nodo-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 21px; }
+#nodo-status { font-size: 18px; color: #7f8392; }
+.nodo-resources { display: flex; height: 76px; gap: 14px; }
+.nodo-resources[hidden], .nodo-services[hidden] { display: none; }
+.nodo-meter, .nodo-disk { border: 1px solid rgba(255,255,255,.08); border-radius: 17px; background: linear-gradient(135deg,rgba(38,40,50,.65),rgba(20,21,27,.6)); }
+.nodo-meter { flex: 1 1 0; padding: 15px 20px; }
+.nodo-metric-heading { display: flex; justify-content: space-between; font-size: 21px; margin-bottom: 13px; }
+.nodo-metric-heading strong { color: #d3d7e2; font-weight: 500; }
+.nodo-track { height: 4px; background: #343743; border-radius: 4px; overflow: hidden; }
+.nodo-track i { display: block; height: 100%; background: #82a9df; }
+.nodo-meter:nth-child(2) .nodo-track i { background: #b095d5; }
+.nodo-disk { flex: 1.2 1 0; display: flex; align-items: center; padding: 8px 14px; gap: 13px; min-width: 0; }
+.nodo-ring { position: relative; flex: 0 0 58px; width: 58px; height: 58px; }
+.nodo-ring svg { width: 58px; height: 58px; transform: rotate(-90deg); }
+.nodo-ring circle { fill: none; stroke-width: 4; }
+.ring-track { stroke: #343743; }
+.ring-value { stroke: #79bea2; }
+.nodo-ring span { position: absolute; top: 20px; left: 0; width: 100%; text-align: center; font-size: 16px; color: #c9d8d0; }
+.nodo-disk-copy { min-width: 0; }
+.nodo-disk-copy strong { display: block; color: #d3d7e2; font-size: 21px; font-weight: 500; }
+.nodo-disk-copy span { display: block; font-size: 17px; margin-top: 5px; white-space: nowrap; }
+.nodo-services { display: flex; flex-wrap: wrap; align-items: center; gap: 9px 18px; margin-top: 15px; font-size: 18px; }
+.nodo-service-summary { color: #b9bfce; margin-right: 8px; }
+.nodo-service { white-space: nowrap; }
+.nodo-service::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #72b793; margin-right: 7px; vertical-align: middle; }
+.nodo-service.is-down { color: #e4989b; }
+.nodo-service.is-down::before { background: #e17f85; }
+.nodo-url input { width: 900px; }
+@media (prefers-reduced-motion: reduce) {
+  .tile, main, .row { transition: none; }
+  .move-arrow { animation: none; }
+}
+/* Wide watermark cards and a bottom dock leave the photograph unobstructed. */
+.nodo-services { justify-content: center; }
+.topbar-left { gap: 16px; }
+.wallpaper-photo { width: 1920px; height: 1080px; object-fit: cover; display: block; }
+.bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg,rgba(5,8,14,.62),rgba(5,8,14,.08) 40%,rgba(5,8,14,.12) 60%,rgba(5,8,14,.8)); pointer-events: none; }
+.nodo-dashboard { padding: 10px 18px; border-radius: 22px; background: rgba(8,11,18,.45); height: 180px; }
+.app-grid { justify-content: center; }
+.app-grid.cards-big { width: 1588px; }
+.app-grid.cards-big .tile { width: 500px; height: 224px; }
+.app-grid.cards-small .tile { width: 324px; height: 160px; }
+.app-grid .app-fallback.logo-only .logo { position: absolute; left: -20px; bottom: -26px; width: 220px; height: 220px; transform: rotate(-9deg); opacity: .26; filter: grayscale(1) brightness(0) invert(1); }
+.app-grid .app-fallback .logo { width: 220px; height: 220px; bottom: -45px; }
+.app-grid .app-fallback .name, .app-grid .tile.fire .name { font-size: 29px; bottom: 24px; left: 104px; right: 16px; }
+.app-grid .tile.fire { position: relative; }
+.app-grid .tile.fire svg.flame { position: absolute; left: -8px; bottom: -30px; width: 180px; height: 180px; opacity: .25; transform: rotate(-9deg); }
+.app-grid .tile.fire .name { position: absolute; max-width: none; color: white; }
+.home-page #grid { position: fixed; left: 80px; top: 824px; width: 1760px; height: 212px; margin: 0; padding: 28px; display: flex; flex-wrap: nowrap; justify-content: flex-start; gap: 24px; overflow-x: auto; overflow-y: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: 34px; background: rgba(20,23,32,.78); box-shadow: 0 14px 50px rgba(0,0,0,.35); scrollbar-width: none; }
+.home-page #grid::-webkit-scrollbar { display: none; }
+.home-page #grid .tile { width: 264px; height: 154px; flex: 0 0 264px; border-radius: 23px; }
+.home-page #grid.cards-small .tile { width: 224px; height: 132px; flex-basis: 224px; }
+.home-page #grid .app-fallback .logo { width: 170px; height: 170px; bottom: -40px; }
+.home-page #grid .app-fallback .name, .home-page #grid .tile.fire .name { font-size: 25px; left: 78px; bottom: 22px; white-space: nowrap; max-width: none; overflow: hidden; text-overflow: ellipsis; }
+.home-page #grid .tile.fire svg.flame { width: 140px; height: 140px; }
+.inputs-page #grid { display: none; }
+.wallpaper-credit { position: fixed; left: 88px; bottom: 266px; max-width: 1700px; font-size: 16px; color: rgba(255,255,255,.8); text-shadow: 0 1px 5px #000; }
+.wallpaper-credit a { color: inherit; text-decoration: none; }
+body.editing .wallpaper-credit, body.tv .wallpaper-credit, body.previewing .wallpaper-credit, body:not(.home-page) .wallpaper-credit { display: none; }
+.home-page #rows { transform: none !important; }
+.home-page #rows { will-change: auto; }
+/* Auto margins center short docks and collapse to zero when horizontal scrolling is needed. */
+.home-page #grid > .tile:first-child { margin-left: auto; }
+.home-page #grid > .tile:last-child { margin-right: auto; }
+/* Original images form a translucent backdrop and a separate logo at the left. */
+.app-grid .native-icon .app-fallback > img.native-backdrop {
+  position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center; opacity: .22; filter: none; z-index: 0;
+}
+.app-grid .native-icon .app-fallback > img.logo,
+.app-grid .native-icon .app-monogram,
+.home-page #grid .native-icon .app-fallback > img.logo,
+.home-page #grid .native-icon .app-monogram {
+  position: absolute; left: 24px; top: 50%; bottom: auto; width: 84px; height: 84px;
+  margin: 0; border-radius: 18px; background: transparent; object-fit: cover;
+  object-position: center; opacity: 1; filter: none; transform: translateY(-50%); z-index: 1;
+}
+.home-page #grid .native-icon .app-fallback > img.logo,
+.home-page #grid .native-icon .app-monogram { left: 18px; width: 60px; height: 60px; border-radius: 13px; }
+.app-grid .native-icon .app-monogram { display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 600; }
+.app-grid .native-icon .app-monogram[hidden] { display: none; }
+/* Wrap dock names and reduce long labels without ellipses. */
+.home-page #grid .app-fallback .name, .home-page #grid .tile.fire .name { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: break-word; word-break: break-word; font-size: 22px; line-height: 1.12; }
+.home-page #grid .app-fallback .name.name-long { font-size: 20px; }
+.home-page #grid .app-fallback .name.name-extra-long { font-size: 18px; }
+
+/* Every launcher title occupies the same lower-right area, clear of the left logo. */
+.app-grid .app-fallback .name, .app-grid .tile.fire .name { left: 126px; right: 24px; bottom: 24px; text-align: right; }
+.home-page #grid .app-fallback .name, .home-page #grid .tile.fire .name { left: 94px; right: 18px; bottom: 18px; text-align: right; }
+/* Preserve word boundaries; measured text fitting handles words wider than their label. */
+.app-grid .app-fallback .name, .app-grid .tile.fire .name,
+.home-page #grid .app-fallback .name, .home-page #grid .tile.fire .name { overflow-wrap: normal; word-break: normal; hyphens: none; }
+.topbar-left { gap: 12px; }

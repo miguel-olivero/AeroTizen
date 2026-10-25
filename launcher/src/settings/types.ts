@@ -10,6 +10,7 @@ export interface WeatherLocation {
   name: string; label?: string; latitude: number; longitude: number; country_code?: string;
 }
 export interface SettingsValues {
+  nodoUrl?: string;
   home: string[]; cardSize: CardSize; background: string; speed: number;
   showWeather: boolean; showTime: boolean; showNetwork: boolean; tempUnit: TemperatureUnit;
   weatherLocation: WeatherLocation | null; weatherShowLocation: boolean;
@@ -71,6 +72,7 @@ export interface SettingsServices {
   showPreviewMessage(): void; hidePreviewMessage(): void;
 }
 export interface SettingsActions {
+  setNodoUrl(url: string): void;
   setBackground(background: string): void; setWeatherVisible(visible: boolean): void;
   setLocationVisible(visible: boolean): void; setTempUnit(unit: TemperatureUnit): void;
   setDateFormat(format: DateFormat): void; setNetworkVisible(visible: boolean): void;
